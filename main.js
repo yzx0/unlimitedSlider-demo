@@ -1,85 +1,111 @@
-let n
-let imgAmount = $('#imgVessel>img').length
-init()
+let $slider = $('#slider')
+let $imgs = $('#slider>img')
+let $btns = $('#btnWrapper>button')
+let current = 0
 
-let timer = setInterval((e) => {
-    makeLeave(getImg(n))
-        .one('transitionend', (e) => {
-            makeEnter($(e.currentTarget))
-        })
-    makeCurrent(getImg(n+1))
-    n += 1
-}, 3000)
+makeFakeSliders()
 
-document.addEventListener('visibilitychange',()=>{
-    if(document.hidden){
-        window.clearInterval(timer)
-    }else{
-        timer = setInterval((e) => {
-            makeLeave(getImg(n))
-                .one('transitionend', (e) => {
-                    makeEnter($(e.currentTarget))
-                })
-            makeCurrent(getImg(n+1))
-            n += 1
-        }, 3000)
-    }
+$('#previous').on('click',()=>{  
+    goToSlider(current-1)
+})
+$('#next').on('click',()=>{
+    
+    goToSlider(current+1)
 })
 
-function getImg(n){
-    return $(`#imgVessel>img:nth-child(${imgIndex(n)}`)
-}
+let timer = setInterval(() => {
+    goToSlider(current+1)
+}, 2000);
 
-function makeLeave($node){
-    return $node.removeClass('current').addClass('leave')
-}
+$('#container').on('mouseenter',()=>{
+    window.clearInterval(timer)
+})
+$('#container').on('mouseleave',()=>{
+    timer = setInterval(() => {
+        goToSlider(current+1)
+    }, 2000);
+})
 
-function makeEnter($node){
-    return $node.removeClass('leave').addClass('enter')
-}
-
-function makeCurrent($node){
-    return $node.removeClass('enter').addClass('current')
-}
-
-function init(){
-    n = 1
-    $(`#imgVessel>img:nth-child(${n})`).addClass('current')
-    .siblings().addClass('enter')
-}
-
-function imgIndex(n) {
-    if (n > imgAmount) {
-        n = n % imgAmount
-        if (n === 0) {
-            n = imgAmount
-        }
+$('#btnWrapper').on('click','button',(e)=>{
+    let index = $(e.currentTarget).index()
+    goToSlider(index)
+})
+function goToSlider(index){
+    if(index>$btns.length-1){
+        index = 0
+    }else if(index<0){
+        index = $btns.length-1
     }
-    return n
+
+    if(current === $btns.length-1 && index === 0){
+        //最后一张到第一张
+        $slider.css({transform:`translateX(${-($btns.length+1)*400}px)`})
+        .one('transitionend',()=>{
+            $slider.hide().offset()
+            $slider.css({transform:`translateX(${-(index+1)*400}px)`}).show()
+        })
+    }else if(current === 0 && index === $btns.length-1){
+        //第一张到最后一张
+        $slider.css({transform:`translateX(0px)`})
+        .one('transitionend',()=>{
+            $slider.hide().offset()
+            $slider.css({transform:`translateX(${-(index+1)*400}px)`}).show()
+        })
+    }else{
+        $slider.css({transform:`translateX(${-(index+1)*400}px)`})
+    } 
+    current = index
 }
 
 
-//思考过程
-// setTimeout(()=>{
-//     $('#imgVessel>img:nth-child(1)').removeClass('current').addClass('leave')
-//     .one('transitionend',(e)=>{
-//         $(e.currentTarget).removeClass('leave').addClass('enter')
-//     })
-//     $('#imgVessel>img:nth-child(2)').removeClass('enter').addClass('current')
-// },2000)
 
-// setTimeout(()=>{
-//     $('#imgVessel>img:nth-child(2)').removeClass('current').addClass('leave')
-//     .one('transtionend',(e)=>{
-//         $(e.currentTarget).removeClass('leave').addClass('enter')
-//     })
-//     $('#imgVessel>img:nth-child(3)').removeClass('enter').addClass('current')
-// },4000)
+/* function bindEvent(){
+    $btns.eq(0).on('click',()=>{
+        if(current === 4){
+            $slider.css({transform:'translateX(-2400px)'})
+            .one('transitionend',()=>{
+                $slider.css({transform:'translateX(-400px)'})
+                .hide()
+                $slider.offset()
+                $slider.show()
+            })
+        }else{
+            $slider.css({transform:'translateX(-400px)'})
+            current = 0
+        }       
+    })
+    $btns.eq(1).on('click',()=>{
+        $slider.css({transform:'translateX(-800px)'})
+        current = 1
+    })
+    $btns.eq(2).on('click',()=>{
+        $slider.css({transform:'translateX(-1200px)'})
+        current = 2
+    })
+    $btns.eq(3).on('click',()=>{
+        $slider.css({transform:'translateX(-1600px)'})
+        current = 3
+    })
+    $btns.eq(4).on('click',()=>{
+        if(current === 0){
+            $slider.css({transform:'translateX(400px)'})
+            .one('transitionend',()=>{
+                $slider.css({transform:'translateX(-400px)'})
+                .hide()
+                $slider.offset()
+                $slider.show()
+            })
+        }else{
+            $slider.css({transform:'translateX(-2000px)'})
+            current = 4
+        }   
+    })
+}
+ */
 
-// setTimeout(()=>{
-//     $('#imgVessel>img:nth-child(3)').removeClass('current').addClass('leave')
-//     .one('transitionend',(e)=>{
-//         $(e.currentTarget).removeClass('leave').addClass('enter')
-//     })
-//     $('#imgVessel>img:nth-child(1)').removeClass('enter').addClass('current')
-// },6000)
+function makeFakeSliders(){
+    let $firstCopy = $imgs.eq(0).clone(true)
+    let $lastCopy = $imgs.eq(length-1).clone(true)
+    $slider.append($firstCopy)
+    $slider.prepend($lastCopy)
+}

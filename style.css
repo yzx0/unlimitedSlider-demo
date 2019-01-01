@@ -6,22 +6,16 @@
     margin: 20px auto;
     overflow: hidden;
 }
-.imgVessel{
-    position: relative;
+.slider{
+    display: flex;
+    transition: all .5s;
+    transform: translateX(-400px);
 }
-.imgVessel > img{
-    position: absolute;
-    top: 0;
-    transition: all 1s;
+
+.btnWrapper{
+    text-align: center;
 }
-.imgVessel > img.current{
-    left: 0;
-    transform: translateX(0);
-    z-index: 1;
-}
-.imgVessel > img.leave{
-    transform: translateX(-100%);
-}
-.imgVessel > img.enter{
-    transform: translateX(100%);
+
+.controls{
+    text-align: center;
 }
